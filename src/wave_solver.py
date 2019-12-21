@@ -14,27 +14,27 @@ import numpy as np
 class ForwardBorn(Function):
 
     @staticmethod
-    def forward(ctx, input, model, src, rec, space_order=8, nb=40, isic=False, dt=None, free_surface=False, weight=None):
-
+    def forward(ctx, input, model, src, rec, device):
+        input = input.to('cpu')
         # Save modeling parameters for backward pass
         ctx.model = model
         ctx.src = src
         ctx.rec = rec
+        ctx.device = device
 
         # Prepare input
         input = input.detach()
         model.dm = DevFunc(name="dm", grid=model.grid)
-        # model.dm.data[:] = model.pad(input[0,0,:,:].numpy())
         model.dm.data[:] = nn.ReflectionPad2d((40))(input).numpy()[0, 0, :, :]
 
         # Linearized forward modeling
         d_lin = forward_born(model, src.coordinates.data, src.data, rec.coordinates.data)
 
-        return torch.from_numpy(d_lin)
-
+        return torch.from_numpy(d_lin).to(ctx.device)
 
     @staticmethod
     def backward(ctx, grad_output):
+        grad_output = grad_output.to('cpu')
         grad_output = grad_output.detach().numpy()
 
         # Adjoint linearized modeling
@@ -43,22 +43,9 @@ class ForwardBorn(Function):
 
         # Remove padding
         nb = ctx.model.nbpml
-        g = torch.from_numpy(g[nb:-nb, nb:-nb])
+        g = torch.from_numpy(g[nb:-nb, nb:-nb]).to(ctx.device)
 
-        return g.view(1, 1, g.shape[0], g.shape[1]), None, None, None
-
-    def acoustic_laplacian(ctx, v, rho):
-        if rho is None:
-            Lap = v.laplace
-            rho = 1
-        else:
-            if isinstance(rho, Function):
-                Lap = sum([first_derivative(first_derivative(v, fd_order=int(v.space_order/2), side=left, dim=d) / rho,
-                        fd_order=int(v.space_order/2), dim=d, side=right) for d in v.space_dimensions])
-            else:
-                Lap = 1 / rho * v.laplace
-        return Lap, rho
-
+        return g.view(1, 1, g.shape[0], g.shape[1]), None, None, None, None
 
 class AdjointBorn(Function):
 
