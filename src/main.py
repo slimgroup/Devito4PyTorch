@@ -12,6 +12,8 @@ import os
 import matplotlib.ticker as ticker
 sfmt=ticker.ScalarFormatter(useMathText=True) 
 sfmt.set_powerlimits((0, 0))
+np.random.seed(19)
+torch.manual_seed(19)
 
 class DevitoLayer(nn.Module):
     def __init__(self, shots, shape, origin, spacing, m0, dm, noise=0.0, device='cpu'):
@@ -78,11 +80,13 @@ class DevitoLayer(nn.Module):
 
         return y
 
-
+def tv_loss(input):
+    return (torch.sum(torch.abs(input[:, :, :, :-1] - input[:, :, :, 1:])) + \
+    torch.sum(torch.abs(input[:, :, :-1, :] - input[:, :, 1:, :])))
 
 if __name__ == '__main__':
 
-    if torch.cuda.is_available():
+    if torch.cuda.is_available() and 0:
         torch.backends.cudnn.enabled = True
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
@@ -100,16 +104,16 @@ if __name__ == '__main__':
     
     m0, m, dm, spacing, shape, origin = judi_model()
     x = dm.to(device)
-    wave_solver = DevitoLayer(y, shape, origin, spacing, m0, dm, noise=0.0, device=device)
+    wave_solver = DevitoLayer(y, shape, origin, spacing, m0, dm, noise=0.2, device=device)
 
     x_est = torch.zeros(x.size()).to(device)
     x_est.requires_grad = True
     zero_vec = torch.zeros(x_est.size(), device=device)
 
-    optim = torch.optim.ASGD([x_est], lr=0.001, weight_decay=1.0e10)
+    optim = torch.optim.ASGD([x_est], lr=0.004, weight_decay=0.0)
     l2_loss = torch.nn.MSELoss()
 
-    for j in range(10):
+    for j in range(20):
         optim.zero_grad()
         A = wave_solver.create_operators()
         y = wave_solver.mix_data()
@@ -117,21 +121,20 @@ if __name__ == '__main__':
         y = y.to(device)
 
         pred = A(x_est)
-        x_loss = l2_loss(pred.reshape(-1), y.reshape(-1))# + 1e4*l2_loss(x_est, zero_vec)
-        # grad_x = torch.autograd.grad(x_loss, [x_est], create_graph=False)
-        # for param, grad in zip([x_est], grad_x):
-        #     param.grad = grad
-
-        x_loss.backward()
+        x_loss = l2_loss(pred.reshape(-1), y.reshape(-1)) + 0.1*tv_loss(x_est)
+        grad_x = torch.autograd.grad(x_loss, [x_est], create_graph=False)
+        for param, grad in zip([x_est], grad_x):
+            param.grad = grad
         optim.step()
 
         fig = plt.figure("G(z_0)", dpi=100, figsize=(7, 2.5))
-        plt.imshow(x_est[0, 0, :, :].cpu().detach().t().numpy(), vmin=-3.0/90.0, vmax=5.0/90.0)
+        plt.imshow(x_est[0, 0, :, :].cpu().detach().t().numpy(), vmin=-3.0/90.0, vmax=3.0/90.0, cmap="twilight_shifted")
         plt.colorbar(fraction=0.014, pad=0.03)
         plt.savefig(os.path.join("figs/", "X0_" + 
             str(j) + ".png"), format="png", bbox_inches="tight", dpi=100)
         plt.close(fig)
         print(("Itr: [%d/%d] | loss: %4.8f | model loss: %4.8f" % (j+1, 10, x_loss, l2_loss(x_est, x))))
+        print(0.1*tv_loss(x_est))
 
     from IPython import embed; embed()
 
