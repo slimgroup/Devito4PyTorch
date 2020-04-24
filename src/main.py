@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-from devito_wrapper import ForwardBorn, ForwardModeling
+from devito_wrapper import *
 from examples.seismic import demo_model, setup_geometry
 from examples.seismic.acoustic import AcousticWaveSolver
 from scipy import ndimage
@@ -25,9 +25,8 @@ class ForwardModelingLayer(torch.nn.Module):
         self.solver = AcousticWaveSolver(self.model, self.geometry, space_order=8)
 
     def forward(self, x):
-        data = self.forward_modeling.apply(x, self.model, self.geometry, self.device, self.solver)
+        data = self.forward_modeling.apply(x, self.model, self.geometry, self.solver, self.device)
         return data
-
 
 class ForwardBornLayer(torch.nn.Module):
     def __init__(self, model, geometry, device):
@@ -41,12 +40,10 @@ class ForwardBornLayer(torch.nn.Module):
         self.solver = AcousticWaveSolver(self.model, self.geometry, space_order=8)
 
     def forward(self, x):
-        data = self.forward_born.apply(x, self.model, self.geometry, self.device, self.solver)
+        data = self.forward_born.apply(x, self.model, self.geometry, self.solver, self.device)
         return data
 
-
 if __name__ == '__main__':
-
 
     tn = 1000.
     model = demo_model('layers-isotropic', origin=(0., 0.), shape=(101, 101),
@@ -74,6 +71,6 @@ if __name__ == '__main__':
     loss = 0.5*torch.norm(forward_born(dm_est) - d_lin0)**2
     grad = torch.autograd.grad(loss, dm_est, create_graph=False)[0]
 
-    plt.imshow(grad[0, 0, ...].detach().cpu().T); plt.show()
+    plt.imshow(grad[0, 0, ...].detach().cpu().T, vmin=-10, vmax=10); plt.show()
 
 

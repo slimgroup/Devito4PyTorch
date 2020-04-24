@@ -7,7 +7,7 @@ import copy
 class ForwardBorn(Function):
 
     @staticmethod
-    def forward(ctx, input, model, geometry, device, solver):
+    def forward(ctx, input, model, geometry, solver, device):
         input = input.to('cpu')
         # Save modeling parameters for backward pass
         ctx.solver = solver
@@ -42,7 +42,7 @@ class ForwardBorn(Function):
 class AdjointBorn(Function):
 
     @staticmethod
-    def forward(ctx, input, model, geometry, device, solver):
+    def forward(ctx, input, model, geometry, solver, device):
 
         # Save modeling parameters for backward pass
         ctx.solver = solver
@@ -76,11 +76,12 @@ class AdjointBorn(Function):
 class ForwardModeling(Function):
 
     @staticmethod
-    def forward(ctx, input, model, geometry, device, solver):
+    def forward(ctx, input, model, geometry, solver, device):
         # Save modeling parameters for backward pass
         # from IPython import embed; embed()
         ctx.model = model
-        ctx.geometry = copy.deepcopy(geometry)
+        # ctx.geometry = copy.deepcopy(geometry)
+        ctx.geometry = geometry
         ctx.device = device
 
         # Prepare input
@@ -97,7 +98,10 @@ class ForwardModeling(Function):
     def backward(ctx, grad_output):
         grad_output = grad_output.detach().cpu().numpy()
 
-        g = ctx.solver.gradient(input.data[:], u=ctx.u0)[0].data
+        rec = ctx.geometry.rec
+        rec.data[:] = grad_output[:]
+
+        g = ctx.solver.gradient(rec, u=ctx.u0)[0].data
 
         # Remove padding
         nb = ctx.model.nbl
