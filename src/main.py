@@ -16,14 +16,14 @@ class ForwardModelingLayer(torch.nn.Module):
     def __init__(self, model, geometry, device):
         super(ForwardModelingLayer, self).__init__()
         
-        self.forward_born = ForwardModeling()
+        self.forward_modeling = ForwardModeling()
 
         self.model = model
         self.geometry = geometry
         self.device = device
 
     def forward(self, x):
-        data = self.forward_born.apply(x, self.model, self.geometry, self.device)
+        data = self.forward_modeling.apply(x, self.model, self.geometry, self.device)
         return data
 
 
