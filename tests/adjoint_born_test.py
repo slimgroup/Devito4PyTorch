@@ -33,7 +33,7 @@ if __name__ == '__main__':
                           spacing=(10., 10.), nbl=40, nlayers=5)
     model0 = demo_model('layers-isotropic', origin=(0., 0.), shape=shape,
                           spacing=(10., 10.), nbl=40, nlayers=5)
-    model0.vp.data[:] = ndimage.gaussian_filter(model0.vp.data, sigma=(1, 1), order=0) 
+    model0.vp.data[:] = ndimage.gaussian_filter(model0.vp.data, sigma=(1, 1), order=0)
     geometry0 = setup_geometry(model0, tn)
     geometry = setup_geometry(model, tn)
 
