@@ -87,7 +87,7 @@ class ForwardModeling(Function):
 
         # Prepare input
         input = input[0, 0, ...].detach().cpu().numpy()
-        ctx.model.vp = np.float32(np.float64(input)**(-0.5))
+        ctx.model.vp = input**(-0.5)
 
         # Nonlinear forward modeling
         d_nonlin, ctx.u0 = ctx.solver.forward(save=True)[:2]
