@@ -54,11 +54,10 @@ if __name__ == '__main__':
     d_lin = torch.from_numpy(d_lin).to(device)
     
     forward_born = ForwardBornLayer(model0, geometry0, device)
-    dm_pred = torch.zeros([1, 1, shape[0], shape[1]], requires_grad=True, 
-        device=device)
+    dm_est = torch.zeros([1, 1, shape[0], shape[1]], requires_grad=True, device=device)
 
-    loss = 0.5*torch.norm(forward_born(dm_pred) - d_lin)**2
-    grad = torch.autograd.grad(loss, dm_pred, create_graph=False)[0]
+    loss = 0.5*torch.norm(forward_born(dm_est) - d_lin)**2
+    grad = torch.autograd.grad(loss, dm_est, create_graph=False)[0]
 
     # Test
-    assert np.isclose((grad - grad_devito)/grad_devito, 0., atol=1.e-8).all()
+    assert np.isclose(grad - grad_devito, 0., atol=1.e-8).all()

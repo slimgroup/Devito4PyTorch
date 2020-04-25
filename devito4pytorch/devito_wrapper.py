@@ -51,11 +51,14 @@ class AdjointBorn(Function):
 
         # Adjoint born modeling
         input = input.detach().cpu().numpy()
+        rec = ctx.geometry.rec
+        rec.data[:] = input[:]
+
         u0 = ctx.solver.forward(save=True)[1]
-        g = gradient(input.data[:], u=u0)[0].data
+        g = ctx.solver.gradient(rec, u=u0)[0].data
 
         # Remove padding
-        nb = model.nbl
+        nb = ctx.model.nbl
         g = torch.from_numpy(g[nb:-nb, nb:-nb]).to(ctx.device)
 
         return g.view(1, 1, g.shape[0], g.shape[1])
@@ -64,10 +67,11 @@ class AdjointBorn(Function):
     def backward(ctx, grad_output):
 
         # Prepare input
-        grad_output = torch.nn.ReplicationPad2d((ctx.model.nbl))(input).detach().cpu().numpy()
+        grad_output = torch.nn.ReplicationPad2d((ctx.model.nbl))(grad_output)
+        grad_output = grad_output.detach().cpu().numpy()[0, 0, :, :]
 
         # Linearized forward modeling
-        d_lin = ctx.solver.born(input[0, 0, :, :])[0].data
+        d_lin = ctx.solver.born(grad_output)[0].data
 
         return torch.from_numpy(d_lin).to(ctx.device), None, None, None, None
 
