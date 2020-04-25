@@ -9,10 +9,10 @@ class ForwardBorn(Function):
     @staticmethod
     def forward(ctx, input, model, geometry, solver, device):
         input = input.to('cpu')
-        # Save modeling parameters for backward pass
-        ctx.solver = solver
+
         ctx.model = model
         ctx.geometry = geometry
+        ctx.solver = solver
         ctx.device = device
 
         # Prepare input
@@ -44,10 +44,9 @@ class AdjointBorn(Function):
     @staticmethod
     def forward(ctx, input, model, geometry, solver, device):
 
-        # Save modeling parameters for backward pass
-        ctx.solver = solver
         ctx.model = model
         ctx.geometry = geometry
+        ctx.solver = solver
         ctx.device = device
 
         # Adjoint born modeling
@@ -77,18 +76,51 @@ class ForwardModeling(Function):
 
     @staticmethod
     def forward(ctx, input, model, geometry, solver, device):
-        # Save modeling parameters for backward pass
-        # from IPython import embed; embed()
+
         ctx.model = model
-        # ctx.geometry = copy.deepcopy(geometry)
         ctx.geometry = geometry
+        ctx.solver = solver
+        ctx.device = device
+
+        # Prepare input
+        input = torch.nn.ReplicationPad2d((ctx.model.nbl))(input).detach().cpu().numpy()
+        ctx.model.vp.data[:] = input**(-0.5)
+
+        # Nonlinear forward modeling
+        d_nonlin, ctx.u0 = ctx.solver.forward(save=True)[:2]
+
+        return torch.from_numpy(d_nonlin.data).to(ctx.device)
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        grad_output = grad_output.detach().cpu().numpy()
+
+        rec = ctx.geometry.rec
+        rec.data[:] = grad_output[:]
+
+        g = ctx.solver.gradient(rec, u=ctx.u0)[0].data
+
+        # Remove padding
+        nb = ctx.model.nbl
+        g = torch.from_numpy(g[nb:-nb, nb:-nb]).to(ctx.device)
+
+        return g.view(1, 1, g.shape[0], g.shape[1]), None, None, None, None
+
+
+class AdjointModeling(Function):
+
+    @staticmethod
+    def forward(ctx, input, model, geometry, solver, device):
+
+        ctx.model = model
+        ctx.geometry = geometry
+        ctx.solver = solver
         ctx.device = device
 
         # Prepare input
         input = torch.nn.ReplicationPad2d((ctx.model.nbl))(input).detach().cpu().numpy()
         ctx.model.vp.data[:] = input**(-0.5)
         
-        ctx.solver = solver
         # Nonlinear forward modeling
         d_nonlin, ctx.u0 = ctx.solver.forward(save=True)[:2]
 
