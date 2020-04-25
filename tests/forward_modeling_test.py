@@ -51,14 +51,13 @@ if __name__ == '__main__':
     grad_devito = np.array(solver0.gradient(rec, u0)[0].data)[nb:-nb, nb:-nb]
 
     ### Deito4PyTorch
-    # from IPython import embed; embed()
     d = torch.from_numpy(np.array(d.data)).to(device)
+
+    forward_modeling = ForwardModelingLayer(model0, geometry0, device)
 
     m0 = np.array(model0.vp.data**(-2))[nb:-nb, nb:-nb]
     m0 = torch.Tensor(m0).unsqueeze(0).unsqueeze(0).to(device)
     m0.requires_grad = True
-
-    forward_modeling = ForwardModelingLayer(model0, geometry0, device)
 
     loss = 0.5*torch.norm(forward_modeling(m0) - d)**2
     grad = torch.autograd.grad(loss, m0, create_graph=False)[0]
