@@ -60,4 +60,4 @@ if __name__ == '__main__':
     grad = torch.autograd.grad(loss, dm_est, create_graph=False)[0]
 
     # Test
-    assert np.isclose(grad - grad_devito, 0., atol=1.e-8).all()
+    assert np.isclose(grad.cpu().numpy() - grad_devito, 0., atol=1.e-8).all()
