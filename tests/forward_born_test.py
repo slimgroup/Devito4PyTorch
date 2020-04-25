@@ -33,6 +33,7 @@ if __name__ == '__main__':
                           spacing=(10., 10.), nbl=40, nlayers=5)
     model0 = demo_model('layers-isotropic', origin=(0., 0.), shape=shape,
                           spacing=(10., 10.), nbl=40, nlayers=5)
+    nb = model.nbl
     model0.vp = ndimage.gaussian_filter(model0.vp.data[nb:-nb, nb:-nb], sigma=(1, 1), order=0)
     geometry0 = setup_geometry(model0, tn)
     geometry = setup_geometry(model, tn)
@@ -47,7 +48,6 @@ if __name__ == '__main__':
 
     rec = geometry0.rec
     rec.data[:] = -d_lin[:]
-    nb = model.nbl
     grad_devito = np.array(solver0.gradient(rec, u0)[0].data[nb:-nb, nb:-nb])
 
     ### Deito4PyTorch

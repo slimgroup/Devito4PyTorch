@@ -33,14 +33,13 @@ if __name__ == '__main__':
                           spacing=(10., 10.), nbl=40, nlayers=5)
     model0 = demo_model('layers-isotropic', origin=(0., 0.), shape=shape,
                           spacing=(10., 10.), nbl=40, nlayers=5)
+    nb = model.nbl
     model0.vp = ndimage.gaussian_filter(model0.vp.data[nb:-nb, nb:-nb], sigma=(1, 1), order=0)
     geometry0 = setup_geometry(model0, tn)
     geometry = setup_geometry(model, tn)
 
     ### Pure Devito
     solver0 = AcousticWaveSolver(model0, geometry0, space_order=8)
-
-    nb = model.nbl
     dm = (model.vp.data**(-2) - model0.vp.data**(-2))
 
     grad_devito = np.array(solver0.born(-dm)[0].data)
