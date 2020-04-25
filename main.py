@@ -1,10 +1,9 @@
 import torch
 import numpy as np
-from devito_wrapper import *
+from devito4pytorch import devito_wrapper
 from examples.seismic import demo_model, setup_geometry
 from examples.seismic.acoustic import AcousticWaveSolver
 from scipy import ndimage
-import matplotlib.pyplot as plt
 
 if not torch.cuda.is_available():
     device = torch.device('cpu')
@@ -17,7 +16,7 @@ class ForwardModelingLayer(torch.nn.Module):
     def __init__(self, model, geometry, device):
         super(ForwardModelingLayer, self).__init__()
         
-        self.forward_modeling = ForwardModeling()
+        self.forward_modeling = devito_wrapper.ForwardModeling()
 
         self.model = model
         self.geometry = geometry
@@ -32,7 +31,7 @@ class ForwardBornLayer(torch.nn.Module):
     def __init__(self, model, geometry, device):
         super(ForwardBornLayer, self).__init__()
         
-        self.forward_born = ForwardBorn()
+        self.forward_born = devito_wrapper.ForwardBorn()
 
         self.model = model
         self.geometry = geometry
@@ -71,6 +70,5 @@ if __name__ == '__main__':
     loss = 0.5*torch.norm(forward_born(dm_est) - d_lin0)**2
     grad = torch.autograd.grad(loss, dm_est, create_graph=False)[0]
 
-    plt.imshow(grad[0, 0, ...].detach().cpu().T, vmin=-10, vmax=10); plt.show()
 
 
