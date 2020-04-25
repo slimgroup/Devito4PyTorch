@@ -66,7 +66,6 @@ class AdjointBorn(Function):
     @staticmethod
     def backward(ctx, grad_output):
 
-        # Prepare input
         grad_output = torch.nn.ReplicationPad2d((ctx.model.nbl))(grad_output)
         grad_output = grad_output.detach().cpu().numpy()[0, 0, :, :]
 
@@ -87,8 +86,8 @@ class ForwardModeling(Function):
         ctx.device = device
 
         # Prepare input
-        input = torch.nn.ReplicationPad2d((ctx.model.nbl))(input).detach().cpu().numpy()
-        ctx.model.vp.data[:] = np.float32(input**(-0.5))
+        input = input[0, 0, ...].detach().cpu().numpy()
+        ctx.model.vp = np.float32(input**(-0.5))
 
         # Nonlinear forward modeling
         d_nonlin, ctx.u0 = ctx.solver.forward(save=True)[:2]
@@ -97,8 +96,8 @@ class ForwardModeling(Function):
 
     @staticmethod
     def backward(ctx, grad_output):
-        grad_output = grad_output.detach().cpu().numpy()
 
+        grad_output = grad_output.detach().cpu().numpy()
         rec = ctx.geometry.rec
         rec.data[:] = grad_output[:]
 
@@ -122,8 +121,8 @@ class AdjointModeling(Function):
         ctx.device = device
 
         # Prepare input
-        input = torch.nn.ReplicationPad2d((ctx.model.nbl))(input).detach().cpu().numpy()
-        ctx.model.vp.data[:] =np.float32(input**(-0.5))
+        input = input[0, 0, ...].detach().cpu().numpy()
+        ctx.model.vp = np.float32(input**(-0.5))
         
         # Nonlinear forward modeling
         d_nonlin, ctx.u0 = ctx.solver.forward(save=True)[:2]
@@ -132,8 +131,8 @@ class AdjointModeling(Function):
 
     @staticmethod
     def backward(ctx, grad_output):
-        grad_output = grad_output.detach().cpu().numpy()
 
+        grad_output = grad_output.detach().cpu().numpy()
         rec = ctx.geometry.rec
         rec.data[:] = grad_output[:]
 
