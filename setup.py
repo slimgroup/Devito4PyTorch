@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="devito4pytorch",
-    version="0.0.3",
+    version="0.0.4",
     author="Ali Siahkoohi",
     author_email="alisk@gatech.edu",
     description="Integrating Devito into PyTorch",
