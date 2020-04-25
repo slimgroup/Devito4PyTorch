@@ -33,7 +33,7 @@ if __name__ == '__main__':
                           spacing=(10., 10.), nbl=40, nlayers=5)
     model0 = demo_model('layers-isotropic', origin=(0., 0.), shape=shape,
                           spacing=(10., 10.), nbl=40, nlayers=5)
-    model0.vp.data[:] = ndimage.gaussian_filter(model0.vp.data, sigma=(1, 1), order=0) 
+    model0.vp = ndimage.gaussian_filter(model0.vp.data[nb:-nb, nb:-nb], sigma=(1, 1), order=0) 
     geometry0 = setup_geometry(model0, tn)
     geometry = setup_geometry(model, tn)
 
@@ -63,4 +63,4 @@ if __name__ == '__main__':
     grad = torch.autograd.grad(loss, m0, create_graph=False)[0]
 
     # Test
-    assert np.isclose(grad.cpu().numpy() - grad_devito, 0., atol=1.e-8).all()
+    assert np.isclose(grad.cpu().numpy()[0, 0, ...] - grad_devito, 0., atol=1.e-8).all()
