@@ -48,10 +48,10 @@ if __name__ == '__main__':
     rec = geometry0.rec
     rec.data[:] = -d_lin[:]
     nb = model.nbl
-    grad_devito = solver0.gradient(rec, u0)[0].data[nb:-nb, nb:-nb]
+    grad_devito = np.array(solver0.gradient(rec, u0)[0].data[nb:-nb, nb:-nb])
 
     ### Deito4PyTorch
-    d_lin = torch.from_numpy(d_lin).to(device)
+    d_lin = torch.from_numpy(np.array(d_lin)).to(device)
     
     forward_born = ForwardBornLayer(model0, geometry0, device)
     dm_est = torch.zeros([1, 1, shape[0], shape[1]], requires_grad=True, device=device)

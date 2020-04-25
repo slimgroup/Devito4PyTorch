@@ -48,13 +48,14 @@ if __name__ == '__main__':
     rec = geometry0.rec
     rec.data[:] = -residual[:]
     nb = model.nbl
-    grad_devito = solver0.gradient(rec, u0)[0].data[nb:-nb, nb:-nb]
+    grad_devito = np.array(solver0.gradient(rec, u0)[0].data)[nb:-nb, nb:-nb]
 
     ### Deito4PyTorch
-    d = torch.from_numpy(d.data).to(device)
+    # from IPython import embed; embed()
+    d = torch.from_numpy(np.array(d.data)).to(device)
 
-    m0 = np.float32(model0.vp.data**(-2))[nb:-nb, nb:-nb]
-    m0 = torch.from_numpy(m0).unsqueeze(0).unsqueeze(0).to(device)
+    m0 = np.array(model0.vp.data**(-2))[nb:-nb, nb:-nb]
+    m0 = torch.Tensor(m0).unsqueeze(0).unsqueeze(0).to(device)
     m0.requires_grad = True
 
     forward_modeling = ForwardModelingLayer(model0, geometry0, device)

@@ -43,10 +43,10 @@ if __name__ == '__main__':
     nb = model.nbl
     dm = (model.vp.data**(-2) - model0.vp.data**(-2))
 
-    grad_devito = solver0.born(-dm)[0].data
+    grad_devito = np.array(solver0.born(-dm)[0].data)
 
     ### Deito4PyTorch
-    dm = torch.from_numpy(dm[nb:-nb, nb:-nb]).to(device)
+    dm = torch.from_numpy(np.array(dm[nb:-nb, nb:-nb])).to(device)
 
     d_est = torch.zeros(geometry0.rec.data.shape, requires_grad=True, device=device)
     adjoint_born = AdjointBornLayer(model0, geometry0, device)
