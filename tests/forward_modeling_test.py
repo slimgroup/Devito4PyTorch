@@ -12,6 +12,7 @@ else:
     device = torch.device('cuda')
     torch.set_default_tensor_type('torch.cuda.FloatTensor')
 
+
 class ForwardModelingLayer(torch.nn.Module):
     def __init__(self, model, geometry, device):
         super(ForwardModelingLayer, self).__init__()
@@ -22,23 +23,25 @@ class ForwardModelingLayer(torch.nn.Module):
         self.solver = AcousticWaveSolver(self.model, self.geometry, space_order=8)
 
     def forward(self, x):
-        return self.forward_modeling.apply(x, self.model, self.geometry, self.solver, self.device)
+        return self.forward_modeling.apply(x, self.model, self.geometry,
+                                           self.solver, self.device)
 
 
-if __name__ == '__main__':
+def test_forward():
 
     tn = 1000.
     shape = (101, 101)
     model = demo_model('layers-isotropic', origin=(0., 0.), shape=shape,
-                          spacing=(10., 10.), nbl=40, nlayers=5)
+                       spacing=(10., 10.), nbl=40, nlayers=5)
     model0 = demo_model('layers-isotropic', origin=(0., 0.), shape=shape,
-                          spacing=(10., 10.), nbl=40, nlayers=5)
+                        spacing=(10., 10.), nbl=40, nlayers=5)
     nb = model.nbl
-    model0.vp = ndimage.gaussian_filter(model0.vp.data[nb:-nb, nb:-nb], sigma=(1, 1), order=0) 
+    model0.vp = ndimage.gaussian_filter(model0.vp.data[nb:-nb, nb:-nb],
+                                        sigma=(1, 1), order=0)
     geometry0 = setup_geometry(model0, tn)
     geometry = setup_geometry(model, tn)
 
-    ### Pure Devito
+    # Pure Devito
     solver = AcousticWaveSolver(model, geometry, space_order=8)
     solver0 = AcousticWaveSolver(model0, geometry0, space_order=8)
 
@@ -50,7 +53,7 @@ if __name__ == '__main__':
     rec.data[:] = -residual[:]
     grad_devito = np.array(solver0.gradient(rec, u0)[0].data)[nb:-nb, nb:-nb]
 
-    ### Deito4PyTorch
+    # Devito4PyTorch
     d = torch.from_numpy(np.array(d.data)).to(device)
 
     forward_modeling = ForwardModelingLayer(model0, geometry0, device)

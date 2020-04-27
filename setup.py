@@ -13,5 +13,6 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.gatech.edu/asiahkoohi3/Devito4PyTorch",
     license='MIT',
+    install_requires=['torch', "devito @ git+https://github.com/devitocodes/devito@master"],
     packages=setuptools.find_packages()
 )

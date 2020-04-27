@@ -2,6 +2,7 @@ import torch
 from torch.autograd import Function
 import numpy as np
 
+
 class ForwardBorn(Function):
 
     @staticmethod
@@ -36,6 +37,7 @@ class ForwardBorn(Function):
         g = torch.from_numpy(np.array(g[nb:-nb, nb:-nb])).to(ctx.device)
 
         return g.view(1, 1, g.shape[0], g.shape[1]), None, None, None, None
+
 
 class AdjointBorn(Function):
 
@@ -121,7 +123,7 @@ class AdjointModeling(Function):
         # Prepare input
         input = input[0, 0, ...].detach().cpu().numpy()
         ctx.model.vp = input**(-0.5)
-        
+
         # Nonlinear forward modeling
         d_nonlin, ctx.u0 = ctx.solver.forward(save=True)[:2]
 
