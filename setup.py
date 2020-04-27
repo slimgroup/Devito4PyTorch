@@ -11,7 +11,7 @@ setuptools.setup(
     description="Integrating Devito into PyTorch",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.gatech.edu/asiahkoohi3/Devito4PyTorch",
+    url="https://github.com/slimgroup/Devito4PyTorch",
     license='MIT',
     install_requires=['torch', "devito @ git+https://github.com/devitocodes/devito@master"],
     packages=setuptools.find_packages()
