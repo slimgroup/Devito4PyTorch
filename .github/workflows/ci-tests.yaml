@@ -1,0 +1,59 @@
+name: CI-tests
+
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the master branch
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  tutorials:
+    name:  Run all tests
+    runs-on: ubuntu-latest
+
+    env:
+      DEVITO_ARCH: gcc-7
+      DEVITO_LANGUAGE: "openmp"
+      DEVITO_BACKEND: "core"
+      PYTHON_VERSION: "3.7"
+      OMP_NUM_THREADS: 2
+
+    strategy:
+          # Prevent all build to stop if a single one fails
+          fail-fast: false
+
+    steps:
+    - name: Checkout Devito4PyTorch
+      uses: actions/checkout@v1
+
+
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+
+    - name: Install dependencies
+      if: matrix.name != 'pytest-docker-py36-gcc-omp'
+      run: |
+        pip install --upgrade pip
+        pip install -e .
+        pip install flake8 codecov pytest-cov pytest pytest-runner
+
+    - name: Lint with flake8
+      run: |
+        flake8 --builtins=ArgumentError .
+
+    - name: Test with pytest
+      run: |
+        pytest --cov --cov-config=.coveragerc --cov-report=xml tests
+  
+    - name: Upload coverage to Codecov
+      if: matrix.name != 'pytest-docker-py36-gcc-omp'
+      uses: codecov/codecov-action@v1.0.6
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        name: ${{ matrix.name }}

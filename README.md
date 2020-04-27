@@ -1,5 +1,5 @@
-[![Build Status for the Core backend](https://github.com/devitocodes/devito/workflows/CI-tests/badge.svg)](https://github.com/devitocodes/devito/actions?query=workflow%3ACI-tests)
-[![Code Coverage](https://codecov.io/gh/devitocodes/devito/branch/master/graph/badge.svg)](https://codecov.io/gh/devitocodes/devito)
+[![CI Status](https://github.com/slimgroup/Devito4PyTorch/workflows/CI-tests/badge.svg)](https://github.com/slimgroup/Devito4PyTorch/actions?query=workflow%3ACI-tests)
+[![Code Coverage](https://codecov.io/gh/slimgroup/Devito4PyTorch/branch/master/graph/badge.svg)](https://codecov.io/gh/slimgroup/Devito4PyTorch)
 
 ## Devito4PyTorch
 
