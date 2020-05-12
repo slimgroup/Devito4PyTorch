@@ -60,7 +60,6 @@ if __name__ == '__main__':
         # Create born operator
         J = op_constructor.create_op(idx)
         
-        # from IPython import embed; embed()
         # Compute predicted data
         dm_est = G(z)
         d_pred = J(dm_est)
