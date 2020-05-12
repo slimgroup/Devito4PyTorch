@@ -72,5 +72,4 @@ class ForwardOpConstructor(object):
         # Receiver geometry
         self.forward_op.geometry.src_positions[:, 0] = src_indx*self.model.spacing[0]
         def J(x): return self.forward_op(self.mute_op(x))
-
         return J

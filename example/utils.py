@@ -31,11 +31,9 @@ def get_data():
     return h5py.File(vel_path, 'r')["data"][...]
 
 
-def save(G):
-
+def save_model(G):
     if not os.path.exists('checkpoint/'):
         os.makedirs('checkpoint/')
-
     torch.save({'model_state_dict': G.state_dict(),
         'z': z}, os.path.join(save_dir,
         'checkpoint.pth'))

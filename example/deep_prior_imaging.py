@@ -33,7 +33,7 @@ if __name__ == '__main__':
     z = torch.randn((1, 3, 256, 192), device=device)
     G = generator(
                 dm.size(),
-                num_input_channels=3, num_output_channels=1, 
+                num_input_channels=3, num_output_channels=1,
                 num_channels_down = [16, 32, 64],
                 num_channels_up   = [16, 32, 64],
                 num_channels_skip = [0, 0, 64],
@@ -49,8 +49,8 @@ if __name__ == '__main__':
 
 
     # Define the optimizer
-    optim = torch.optim.RMSprop(G.parameters(), 1e-3, weight_decay=200.0)
-    
+    optim = torch.optim.RMSprop(G.parameters(), 1e-4, weight_decay=1e0)
+
     max_itr = 3000
     for itr in range(max_itr):
 
@@ -59,16 +59,17 @@ if __name__ == '__main__':
 
         # Create born operator
         J = op_constructor.create_op(idx)
-        
+
         # Compute predicted data
         dm_est = G(z)
         d_pred = J(dm_est)
 
         # Compute the objective function
-        obj = (d_obs.shape[0]/(var * 2.0))*(d_pred - d_obs[idx]).norm()**2
+        obj = (d_obs.shape[0]/(var * 2.0))*torch.norm(d_pred - d_obs[idx])**2
 
         # Compute the gradient w.r.t deep prior unknowns and update them
         obj.backward()
         optim.step()
 
-        print(("Iteration: [%d/%d] | objective: %4.2f " % (itr+1, max_itr, obj)))
+        print(("Iteration: [%d/%d] | objective: %4.4f | model error %4.4f" % \
+            (itr+1, max_itr, obj, ((dm_est.detach()-dm).norm()**2).item())))
