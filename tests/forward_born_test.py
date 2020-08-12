@@ -56,7 +56,7 @@ def test_forward_born():
 
     rec = geometry0.rec
     rec.data[:] = -d_lin[:]
-    grad_devito = np.array(solver0.jacobian_adjoint(rec, u0)[0].data
+    grad_devito = solver0.jacobian_adjoint(rec, u0)[0].data
     grad_devito = np.array(grad_devito)[nbl:-nbl, nbl:-nbl]
 
     # Devito4PyTorch
