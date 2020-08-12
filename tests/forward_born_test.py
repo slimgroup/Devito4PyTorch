@@ -24,7 +24,7 @@ class ForwardBornLayer(torch.nn.Module):
         self.geometry = geometry
         self.device = device
         self.solver = AcousticWaveSolver(self.model, self.geometry,
-                                         space_order=4)
+                                         space_order=8)
 
     def forward(self, x):
         return self.forward_born.apply(x, self.model, self.geometry,
@@ -46,8 +46,8 @@ def test_forward_born():
     geometry = setup_geometry(model, tn)
 
     # Pure Devito
-    solver = AcousticWaveSolver(model, geometry, space_order=4)
-    solver0 = AcousticWaveSolver(model0, geometry0, space_order=4)
+    solver = AcousticWaveSolver(model, geometry, space_order=8)
+    solver0 = AcousticWaveSolver(model0, geometry0, space_order=8)
 
     d = solver.forward(vp=model.vp)[0]
     d0, u0 = solver0.forward(save=True, vp=model0.vp)[:2]

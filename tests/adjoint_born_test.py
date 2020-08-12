@@ -24,7 +24,7 @@ class AdjointBornLayer(torch.nn.Module):
         self.geometry = geometry
         self.device = device
         self.solver = AcousticWaveSolver(self.model, self.geometry,
-                                         space_order=4)
+                                         space_order=8)
 
     def forward(self, x):
         return self.forward_born.apply(x, self.model, self.geometry,
@@ -38,19 +38,19 @@ def test_adjoint_born():
     nbl = 40
     model = demo_model('layers-isotropic', origin=(0., 0.), shape=shape,
                        spacing=(10., 10.), nbl=nbl, nlayers=2,
-                       space_order=4)
+                       space_order=8)
     model0 = demo_model('layers-isotropic', origin=(0., 0.), shape=shape,
                         spacing=(10., 10.), nbl=nbl, nlayers=2,
-                        space_order=4)
+                        space_order=8)
 
     gaussian_smooth(model0.vp, sigma=(1, 1))
     geometry0 = setup_geometry(model0, tn)
 
     # Pure Devito
-    solver0 = AcousticWaveSolver(model0, geometry0, space_order=4)
-    dm = model.vp.data**(-2) - model0.vp.data**(-2)
+    solver0 = AcousticWaveSolver(model0, geometry0, space_order=8)
+    dm = model0.vp.data**(-2) - model.vp.data**(-2)
 
-    grad_devito = np.array(solver0.jacobian(-dm)[0].data)
+    grad_devito = np.array(solver0.jacobian(dm)[0].data)
 
     # Devito4PyTorch
     dm = torch.from_numpy(np.array(dm[nbl:-nbl, nbl:-nbl])).to(device)

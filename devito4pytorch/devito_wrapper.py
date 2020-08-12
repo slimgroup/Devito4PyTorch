@@ -33,7 +33,7 @@ class ForwardBorn(torch.autograd.Function):
         rec.data[:] = grad_output[:]
 
         # Adjoint linearized modeling
-        u0 = ctx.solver.forward(save=True, vp=ctx.model.vp)[1]
+        u0 = ctx.solver.forward(save=True)[1]
         g = ctx.solver.jacobian_adjoint(rec, u0)[0].data
 
         # Remove padding
@@ -60,7 +60,7 @@ class AdjointBorn(torch.autograd.Function):
         rec = ctx.geometry.rec
         rec.data[:] = input[:]
 
-        u0 = ctx.solver.forward(save=True, vp=ctx.model.vp)[1]
+        u0 = ctx.solver.forward(save=True)[1]
         g = ctx.solver.jacobian_adjoint(rec, u=u0)[0].data
 
         # Remove padding
