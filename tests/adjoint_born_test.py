@@ -4,7 +4,6 @@ from devito4pytorch import devito_wrapper
 from devito import gaussian_smooth
 from examples.seismic import demo_model, setup_geometry
 from examples.seismic.acoustic import AcousticWaveSolver
-from scipy import ndimage
 
 if not torch.cuda.is_available():
     device = torch.device('cpu')
@@ -64,6 +63,6 @@ def test_adjoint_born():
     grad = torch.autograd.grad(loss, d_est, create_graph=False)[0]
 
     # Test
-    rel_err =  np.linalg.norm(grad.cpu().numpy()
-                              - grad_devito)/ np.linalg.norm(grad_devito)
+    rel_err = np.linalg.norm(grad.cpu().numpy()
+                             - grad_devito) / np.linalg.norm(grad_devito)
     assert np.isclose(rel_err, 0., atol=1.e-6)

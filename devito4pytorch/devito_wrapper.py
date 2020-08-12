@@ -1,8 +1,8 @@
 import torch
-from torch.autograd import Function
 import numpy as np
 from devito.builtins import initialize_function
 from devito import Function
+
 
 class ForwardBorn(torch.autograd.Function):
     """
@@ -141,7 +141,6 @@ class AdjointModeling(torch.autograd.Function):
                       space_order=ctx.model.space_order)
         initialize_function(vp, input**(-0.5), ctx.model.nbl)
         ctx.model.vp = vp
-
 
         # Nonlinear forward modeling
         d_nonlin, ctx.u0 = ctx.solver.forward(save=True,
