@@ -48,7 +48,7 @@ def test_adjoint_born():
 
     # Pure Devito
     solver0 = AcousticWaveSolver(model0, geometry0, space_order=8)
-    dm = model0.vp.data**(-2) - model.vp.data**(-2)
+    dm = model.vp.data**(-2) - model0.vp.data**(-2)
 
     grad_devito = np.array(solver0.jacobian(dm)[0].data)
 
@@ -60,7 +60,9 @@ def test_adjoint_born():
     adjoint_born = AdjointBornLayer(model0, geometry0, device)
 
     loss = 0.5*torch.norm(adjoint_born(d_est) - dm)**2
-    grad = torch.autograd.grad(loss, d_est, create_graph=False)[0]
+
+    # Negative gradient to be compared with linearized data computed above
+    grad = -torch.autograd.grad(loss, d_est, create_graph=False)[0]
 
     # Test
     rel_err = np.linalg.norm(grad.cpu().numpy()

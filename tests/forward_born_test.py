@@ -37,9 +37,11 @@ def test_forward_born():
     shape = (101, 101)
     nbl = 40
     model = demo_model('layers-isotropic', origin=(0., 0.), shape=shape,
-                       spacing=(10., 10.), nbl=nbl, nlayers=2)
+                       spacing=(10., 10.), nbl=nbl, nlayers=2,
+                       space_order=8)
     model0 = demo_model('layers-isotropic', origin=(0., 0.), shape=shape,
-                        spacing=(10., 10.), nbl=nbl, nlayers=2)
+                        spacing=(10., 10.), nbl=nbl, nlayers=2,
+                        space_order=8)
 
     gaussian_smooth(model0.vp, sigma=(1, 1))
     geometry0 = setup_geometry(model0, tn)
