@@ -102,8 +102,7 @@ class ForwardModeling(torch.autograd.Function):
         ctx.model.vp = vp
 
         # Nonlinear forward modeling
-        d_nonlin, ctx.u0 = ctx.solver.forward(save=True,
-                                              vp=ctx.model.vp)[:2]
+        d_nonlin, ctx.u0 = ctx.solver.forward(save=True)[:2]
 
         return torch.from_numpy(np.array(d_nonlin.data)).to(ctx.device)
 
