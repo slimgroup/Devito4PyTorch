@@ -1,5 +1,6 @@
 [![CI Status](https://github.com/slimgroup/Devito4PyTorch/workflows/CI-tests/badge.svg)](https://github.com/slimgroup/Devito4PyTorch/actions?query=workflow%3ACI-tests)
 [![Code Coverage](https://codecov.io/gh/slimgroup/Devito4PyTorch/branch/master/graph/badge.svg)](https://codecov.io/gh/slimgroup/Devito4PyTorch)
+[![DOI](https://zenodo.org/badge/259481291.svg)](https://zenodo.org/badge/latestdoi/259481291)
 
 ## Devito4PyTorch
 
